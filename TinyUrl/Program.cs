@@ -1,4 +1,7 @@
 using TinyUrl;
+using TinyUrl.Features.TinyUrl.CreateUrl;
+using TinyUrl.Features.TinyUrl.GetUrl;
+using TinyUrl.Features.Weather;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddEndpoints(typeof(Program).Assembly);
+
+builder.Services.AddSingleton<IGetWeatherHandler, GetWeatherHandler>();
+builder.Services.AddSingleton<IGetUrlHandler, GetUrlHandler>();
+builder.Services.AddSingleton<ICreateUrlHandler, CreateUrlHandler>();
+
+
+
 
 var app = builder.Build();
 

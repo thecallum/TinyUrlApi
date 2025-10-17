@@ -1,20 +1,17 @@
 namespace TinyUrl.Features.Weather;
 
-public class GetWeather : IEndpoint
+public class GetWeatherHandler : IGetWeatherHandler
 {
-    public void MapEndpoint(IEndpointRouteBuilder app)
+    private readonly ILogger<GetWeatherHandler> _logger;
+
+    public GetWeatherHandler(ILogger<GetWeatherHandler> logger)
     {
-        app.MapGet("/weatherforecast", HandleAsync)
-            .WithName("GetWeatherForecast")
-            .WithOpenApi();
+        _logger = logger;
     }
     
-    private async Task<IResult> HandleAsync(
-        ILogger<GetWeather> logger,
-        CancellationToken ct)
+    public async Task<IResult> HandleAsync(CancellationToken ct)
     {
-        
-        logger.LogInformation("Fetching weather forecast");
+        _logger.LogInformation("Fetching weather forecast");
         
         var summaries = new[]
         {
