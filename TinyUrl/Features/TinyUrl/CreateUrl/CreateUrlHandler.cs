@@ -1,8 +1,34 @@
 using System.ComponentModel.DataAnnotations;
+using FluentValidation;
+using FluentValidation.Results;
 using TinyUrl.Infrastructure;
 using SimpleBase;
+using Flurl;
+using ValidationResult = System.ComponentModel.DataAnnotations.ValidationResult;
 
 namespace TinyUrl.Features.TinyUrl.CreateUrl;
+
+public class CreateTinyUrlRequestValidator : AbstractValidator<CreateTinyUrlRequest>
+{
+    public CreateTinyUrlRequestValidator()
+    {
+        RuleFor(x => x.FullUrl)
+            .MinimumLength(3)
+            .MaximumLength(100)
+            .Must(url => 
+            {
+                if (string.IsNullOrWhiteSpace(url)) return false;
+        
+                try 
+                { 
+                    var flurl = Url.Parse(url);
+                    return flurl.Scheme == "http" || flurl.Scheme == "https";
+                }
+                catch { return false; }
+            })
+            .WithMessage("Must be a valid HTTP or HTTPS URL");
+    }
+}
 
 public class CreateUrlHandler : ICreateUrlHandler
 {
@@ -16,7 +42,12 @@ public class CreateUrlHandler : ICreateUrlHandler
     public async Task<IResult> HandleAsync(CreateTinyUrlRequest request, CancellationToken ct)
     {
         var validationErrors = ValidateRequest(request);
-        if (validationErrors is not null) return Results.ValidationProblem(validationErrors);
+            Console.WriteLine(validationErrors);
+            
+        if (validationErrors.Any())
+        {
+            return Results.ValidationProblem(validationErrors.GroupBy(x => x.PropertyName).ToDictionary(x => x.Key, x => x.Select(e => e.ErrorMessage).ToArray()));
+        }
         
         var newRecord = new Infrastructure.TinyUrl
         {
@@ -44,27 +75,17 @@ public class CreateUrlHandler : ICreateUrlHandler
         return Base62.Default.Encode(bytes);
     }
     
-    private Dictionary<string, string[]> ValidateRequest(CreateTinyUrlRequest request)
+    private List<ValidationFailure> ValidateRequest(CreateTinyUrlRequest request)
     {
-        var validationResults = new List<ValidationResult>();
-        var context = new ValidationContext(request);
+        var _validator = new CreateTinyUrlRequestValidator();
         
-        var isValid = Validator.TryValidateObject(request, context, validationResults, validateAllProperties: true);
+        var result =  _validator.Validate(request);
 
-        Console.WriteLine(request);
-        Console.WriteLine($"isValid: {isValid}");
-
-        if (!isValid)
+        if (!result.IsValid)
         {
-            var errors = validationResults
-                .GroupBy(x => x.MemberNames.FirstOrDefault() ?? "")
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(x => x.ErrorMessage ?? "").ToArray());
-
-            return errors;
+            return result.Errors;
         }
 
-        return null;
+        return new List<ValidationFailure>();
     }
 }
