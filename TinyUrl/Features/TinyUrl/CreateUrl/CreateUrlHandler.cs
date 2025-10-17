@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using TinyUrl.Infrastructure;
+using SimpleBase;
 
 namespace TinyUrl.Features.TinyUrl.CreateUrl;
 
@@ -26,18 +27,21 @@ public class CreateUrlHandler : ICreateUrlHandler
         _dbContext.Urls.Add(newRecord);
         await _dbContext.SaveChangesAsync();
         
-        byte[] bytes = BitConverter.GetBytes(newRecord.Id);
-        string encoded = Convert.ToBase64String(bytes)
-            .TrimEnd('=')           // Remove padding
-            .Replace('+', '-')      // Make URL-safe
-            .Replace('/', '_');     // Make URL-safe
 
-        newRecord.ShortUrl = encoded;
+        var shortUrl = GenerateShortUrl(newRecord.Id);
+
+        newRecord.ShortUrl = shortUrl;
         await _dbContext.SaveChangesAsync();
 
-        var response = new CreateTinyUrlResponse(encoded, request.FullUrl);
+        var response = new CreateTinyUrlResponse(shortUrl, request.FullUrl);
 
-        return Results.Created(new Uri($"https://url/{encoded}/"), response);
+        return Results.Created(new Uri($"https://url/{shortUrl}/"), response);
+    }
+
+    private string GenerateShortUrl(int id)
+    {
+        var bytes = BitConverter.GetBytes(id);
+        return Base62.Default.Encode(bytes);
     }
     
     private Dictionary<string, string[]> ValidateRequest(CreateTinyUrlRequest request)
