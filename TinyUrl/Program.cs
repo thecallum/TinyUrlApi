@@ -1,7 +1,9 @@
+using Microsoft.EntityFrameworkCore;
 using TinyUrl;
 using TinyUrl.Features.TinyUrl.CreateUrl;
 using TinyUrl.Features.TinyUrl.GetUrl;
 using TinyUrl.Features.Weather;
+using TinyUrl.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,11 +13,16 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddEndpoints(typeof(Program).Assembly);
 
-builder.Services.AddSingleton<IGetWeatherHandler, GetWeatherHandler>();
-builder.Services.AddSingleton<IGetUrlHandler, GetUrlHandler>();
-builder.Services.AddSingleton<ICreateUrlHandler, CreateUrlHandler>();
+builder.Services.AddTransient<IGetWeatherHandler, GetWeatherHandler>();
+builder.Services.AddTransient<IGetUrlHandler, GetUrlHandler>();
+builder.Services.AddTransient<ICreateUrlHandler, CreateUrlHandler>();
 
 
+var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") 
+                       ?? "Host=127.0.0.1;Database=postgres;Username=postgres;Password=postgres";
+
+builder.Services.AddDbContext<TinyUrlDbContext>(opt =>
+    opt.UseNpgsql(connectionString));
 
 
 var app = builder.Build();

@@ -1,13 +1,44 @@
 using System.ComponentModel.DataAnnotations;
+using TinyUrl.Infrastructure;
 
 namespace TinyUrl.Features.TinyUrl.CreateUrl;
 
 public class CreateUrlHandler : ICreateUrlHandler
 {
-    private Dictionary<string, string> _urls = new Dictionary<string, string>
+    private readonly TinyUrlDbContext _dbContext;
+
+    public CreateUrlHandler(TinyUrlDbContext dbContext)
     {
-        {"AAA", "https://google.com"}
-    };
+        _dbContext = dbContext;
+    }
+    
+    public async Task<IResult> HandleAsync(CreateTinyUrlRequest request, CancellationToken ct)
+    {
+        var validationErrors = ValidateRequest(request);
+        if (validationErrors is not null) return Results.ValidationProblem(validationErrors);
+        
+        var newRecord = new Infrastructure.TinyUrl
+        {
+            FullUrl = request.FullUrl,
+            ShortUrl = "placeholder"
+        };
+
+        _dbContext.Urls.Add(newRecord);
+        await _dbContext.SaveChangesAsync();
+        
+        byte[] bytes = BitConverter.GetBytes(newRecord.Id);
+        string encoded = Convert.ToBase64String(bytes)
+            .TrimEnd('=')           // Remove padding
+            .Replace('+', '-')      // Make URL-safe
+            .Replace('/', '_');     // Make URL-safe
+
+        newRecord.ShortUrl = encoded;
+        await _dbContext.SaveChangesAsync();
+
+        var response = new CreateTinyUrlResponse(encoded, request.FullUrl);
+
+        return Results.Created(new Uri($"https://url/{encoded}/"), response);
+    }
     
     private Dictionary<string, string[]> ValidateRequest(CreateTinyUrlRequest request)
     {
@@ -31,25 +62,5 @@ public class CreateUrlHandler : ICreateUrlHandler
         }
 
         return null;
-    }
-    
-    public Task<IResult> HandleAsync(CreateTinyUrlRequest request, CancellationToken ct)
-    {
-        var validationErrors = ValidateRequest(request);
-        if (validationErrors is not null) return Task.FromResult(Results.ValidationProblem(validationErrors));
-        
-        var nextId = _urls.Count() + 1;
-        
-        byte[] bytes = BitConverter.GetBytes(nextId);
-        string encoded = Convert.ToBase64String(bytes)
-            .TrimEnd('=')           // Remove padding
-            .Replace('+', '-')      // Make URL-safe
-            .Replace('/', '_');     // Make URL-safe
-        
-        _urls.Add(encoded, request.FullUrl);
-
-        var response = new CreateTinyUrlResponse(encoded, request.FullUrl);
-
-        return Task.FromResult(Results.Created(new Uri($"https://url/{encoded}/"), response));
     }
 }

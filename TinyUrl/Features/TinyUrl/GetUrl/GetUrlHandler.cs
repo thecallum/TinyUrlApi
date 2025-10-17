@@ -1,20 +1,25 @@
+using Microsoft.EntityFrameworkCore;
+using TinyUrl.Infrastructure;
+
 namespace TinyUrl.Features.TinyUrl.GetUrl;
 
 public class GetUrlHandler : IGetUrlHandler
 {
-    private Dictionary<string, string> _urls = new Dictionary<string, string>
+    private readonly TinyUrlDbContext _dbContext;
+
+    public GetUrlHandler(TinyUrlDbContext dbContext)
     {
-        {"AAA", "https://google.com"}
-    };
-    
-    public Task<IResult> HandleAsync(string id, CancellationToken ct)
+        _dbContext = dbContext;
+    }
+
+    public async Task<IResult> HandleAsync(string id, CancellationToken ct)
     {
-        if (!_urls.ContainsKey(id))
+        var matchingRecord = await _dbContext.Urls.FirstOrDefaultAsync(x => x.ShortUrl == id);
+        if (matchingRecord is null)
         {
-            return Task.FromResult(Results.NotFound($"No record found matching {id}"));
+            return Results.NotFound($"No record found matching {id}");
         }
-        
-        var matchingRecord = _urls[id];
-        return Task.FromResult(Results.Redirect(matchingRecord));
+
+        return Results.Redirect(matchingRecord.FullUrl);
     }
 }
