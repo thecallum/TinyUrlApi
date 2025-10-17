@@ -1,0 +1,7 @@
+﻿services:
+  tinyurl:
+    image: tinyurl
+    build:
+      context: .
+      dockerfile: TinyUrl/Dockerfile
+
