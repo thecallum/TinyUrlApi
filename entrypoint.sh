@@ -6,21 +6,14 @@ echo "🚀 TinyURL Backend Startup"
 echo "==================================="
 
 echo "⏳ Waiting for postgres..."
-while ! nc -z postgres 5432; do
-  echo "   Postgres not ready, waiting..."
-  sleep 2
+until dotnet ef database update --no-build 2>&1; do
+  echo "   Postgres not ready or migrations failed, retrying..."
+  sleep 3
 done
-echo "✅ Postgres is ready!"
 
-echo "🔄 Running database migrations..."
-dotnet ef database update --no-build
+echo "✅ Postgres is ready and migrations completed!"
 
-if [ $? -eq 0 ]; then
-    echo "✅ Migrations completed successfully"
-else
-    echo "❌ Migration failed!"
-    exit 1
-fi
+echo "🎯 Starting application..."
+echo "==================================="
 
-echo "Starting application..."
 exec dotnet TinyUrl.dll "$@"
