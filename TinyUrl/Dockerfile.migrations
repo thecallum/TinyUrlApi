@@ -1,0 +1,18 @@
+﻿FROM mcr.microsoft.com/dotnet/sdk:8.0
+WORKDIR /src
+
+# Copy and restore
+COPY ["TinyUrl/TinyUrl.csproj", "TinyUrl/"]
+RUN dotnet restore "TinyUrl/TinyUrl.csproj"
+
+# Copy everything and build
+COPY . .
+WORKDIR "/src/TinyUrl"
+RUN dotnet build "TinyUrl.csproj" -c Release
+
+# Install EF tools
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
+# Run with verbose flag
+CMD ["dotnet", "ef", "database", "update"]
