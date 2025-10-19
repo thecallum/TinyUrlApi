@@ -12,17 +12,6 @@
     depends_on:
       - db
 
-  migrations:
-    build:
-      context: .
-      dockerfile: TinyUrl/Dockerfile.migrations
-    environment:
-      - CONNECTION_STRING=Host=db;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
-    depends_on:
-      - db
-    profiles:
-      - migrations
-
   db:
     image: postgres
     restart: unless-stopped
