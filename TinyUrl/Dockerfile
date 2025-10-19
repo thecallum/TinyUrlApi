@@ -23,8 +23,8 @@ COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "TinyUrl.dll"]
 
 # Copy entrypoint script
-#COPY entrypoint.sh /app/
-#RUN chmod +x /app/entrypoint.sh
+COPY entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
 #
 ##EXPOSE 8080
 #
