@@ -23,4 +23,4 @@ else
 fi
 
 echo "Starting application..."
-exec dotnet TinyUrl.dll
+exec dotnet TinyUrl.dll "$@"
