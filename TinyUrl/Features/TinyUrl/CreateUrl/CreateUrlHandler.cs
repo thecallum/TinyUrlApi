@@ -11,10 +11,10 @@ public class CreateUrlHandler : ICreateUrlHandler
     private readonly TinyUrlDbContext _dbContext;
     private readonly CreateTinyUrlRequestValidator _validator;
 
-    public CreateUrlHandler(TinyUrlDbContext dbContext, CreateTinyUrlRequestValidator validator)
+    public CreateUrlHandler(TinyUrlDbContext dbContext)
     {
         _dbContext = dbContext;
-        _validator = validator;
+        _validator = new CreateTinyUrlRequestValidator();
     }
 
     public async Task<IResult> HandleAsync(CreateTinyUrlRequest request, CancellationToken ct)

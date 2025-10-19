@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using TinyUrl;
 using TinyUrl.Features.TinyUrl.CreateUrl;
@@ -16,6 +17,9 @@ builder.Services.AddEndpoints(typeof(Program).Assembly);
 builder.Services.AddTransient<IGetWeatherHandler, GetWeatherHandler>();
 builder.Services.AddTransient<IGetUrlHandler, GetUrlHandler>();
 builder.Services.AddTransient<ICreateUrlHandler, CreateUrlHandler>();
+
+
+// builder.Services.AddScoped<IValidator<CreateTinyUrlRequest>, CreateTinyUrlRequestValidator>();
 
 
 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING")

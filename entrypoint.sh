@@ -1,12 +1,10 @@
 #!/bin/bash
 set -e
 
-echo "==================================="
-echo "🚀 TinyURL Backend Startup"
-echo "==================================="
+cd /app/TinyUrl
 
 echo "⏳ Waiting for postgres..."
-until dotnet ef database update --no-build 2>&1; do
+until dotnet ef database update; do
   echo "   Postgres not ready or migrations failed, retrying..."
   sleep 3
 done
@@ -16,4 +14,5 @@ echo "✅ Postgres is ready and migrations completed!"
 echo "🎯 Starting application..."
 echo "==================================="
 
+cd /app/build
 exec dotnet TinyUrl.dll "$@"
