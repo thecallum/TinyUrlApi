@@ -18,7 +18,7 @@ builder.Services.AddTransient<IGetUrlHandler, GetUrlHandler>();
 builder.Services.AddTransient<ICreateUrlHandler, CreateUrlHandler>();
 
 
-var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") 
+var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING")
                        ?? "Host=127.0.0.1;Database=postgres;Username=postgres;Password=postgres";
 
 builder.Services.AddDbContext<TinyUrlDbContext>(opt =>

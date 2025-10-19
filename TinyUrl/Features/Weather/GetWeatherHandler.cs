@@ -8,16 +8,16 @@ public class GetWeatherHandler : IGetWeatherHandler
     {
         _logger = logger;
     }
-    
+
     public async Task<IResult> HandleAsync(CancellationToken ct)
     {
         _logger.LogInformation("Fetching weather forecast");
-        
+
         var summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
-        
+
         var forecast = Enumerable.Range(1, 5).Select(index =>
                 new WeatherForecast
                 (
@@ -26,7 +26,7 @@ public class GetWeatherHandler : IGetWeatherHandler
                     summaries[Random.Shared.Next(summaries.Length)]
                 ))
             .ToArray();
-        
+
         return Results.Ok(forecast);
     }
 }

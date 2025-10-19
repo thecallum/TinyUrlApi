@@ -10,12 +10,12 @@ public class CreateTinyUrlRequestValidator : AbstractValidator<CreateTinyUrlRequ
         RuleFor(x => x.FullUrl)
             .MinimumLength(3)
             .MaximumLength(100)
-            .Must(url => 
+            .Must(url =>
             {
                 if (string.IsNullOrWhiteSpace(url)) return false;
-        
-                try 
-                { 
+
+                try
+                {
                     var flurl = Url.Parse(url);
                     return flurl.Scheme == "http" || flurl.Scheme == "https";
                 }

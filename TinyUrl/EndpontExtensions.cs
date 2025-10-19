@@ -4,7 +4,7 @@ namespace TinyUrl;
 
 public static class EndpontExtensions
 {
-    
+
     public static IServiceCollection AddEndpoints(
         this IServiceCollection services,
         Assembly assembly)
@@ -19,7 +19,7 @@ public static class EndpontExtensions
 
         return services;
     }
-    
+
     public static IApplicationBuilder MapEndpoints(this WebApplication app)
     {
         var endpoints = app.Services.GetRequiredService<IEnumerable<IEndpoint>>();

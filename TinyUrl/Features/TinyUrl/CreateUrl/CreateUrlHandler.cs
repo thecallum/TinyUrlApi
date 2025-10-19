@@ -10,16 +10,16 @@ public class CreateUrlHandler : ICreateUrlHandler
 {
     private readonly TinyUrlDbContext _dbContext;
     private readonly CreateTinyUrlRequestValidator _validator;
-    
+
     public CreateUrlHandler(TinyUrlDbContext dbContext, CreateTinyUrlRequestValidator validator)
     {
         _dbContext = dbContext;
         _validator = validator;
     }
-    
+
     public async Task<IResult> HandleAsync(CreateTinyUrlRequest request, CancellationToken ct)
     {
-        var result =  _validator.Validate(request);
+        var result = _validator.Validate(request);
 
         if (!result.IsValid)
         {
@@ -29,7 +29,7 @@ public class CreateUrlHandler : ICreateUrlHandler
                     x.Select(e => e.ErrorMessage).ToArray());
             return Results.ValidationProblem(errorResponse);
         }
-        
+
         var newRecord = new Infrastructure.TinyUrl
         {
             FullUrl = request.FullUrl,
