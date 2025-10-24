@@ -18,9 +18,24 @@ builder.Services.AddTransient<IGetWeatherHandler, GetWeatherHandler>();
 builder.Services.AddTransient<IGetUrlHandler, GetUrlHandler>();
 builder.Services.AddTransient<ICreateUrlHandler, CreateUrlHandler>();
 
-
-// builder.Services.AddScoped<IValidator<CreateTinyUrlRequest>, CreateTinyUrlRequestValidator>();
-
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            policy.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+        else
+        {
+            policy.WithOrigins("https://tinyurl.callum-macpherson.com")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+    });
+});
 
 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING")
                        ?? "Host=127.0.0.1;Database=postgres;Username=postgres;Password=postgres";
@@ -31,6 +46,7 @@ builder.Services.AddDbContext<TinyUrlDbContext>(opt =>
 
 var app = builder.Build();
 
+
 app.MapEndpoints();
 
 // Configure the HTTP request pipeline.
@@ -40,8 +56,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
+app.UseCors();
+// app.UseHttpsRedirection();
 
 
 

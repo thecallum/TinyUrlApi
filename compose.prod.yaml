@@ -1,4 +1,11 @@
-﻿services:
+﻿networks:
+  internal:
+    driver: bridge
+    internal: true
+  public:
+    driver: bridge 
+
+services:
   tinyurl:
     image: tinyurl
     ports:
@@ -11,6 +18,8 @@
     restart: unless-stopped
     depends_on:
       - db
+    networks:
+      - internal
 
   db:
     image: postgres
@@ -23,6 +32,20 @@
     ports: []
     volumes:
       - postgres-data-prod:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TOKEN}
+    networks:
+      - internal
+      - public
+    depends_on:
+      - tinyurl
 
 volumes:
   postgres-data-prod:
