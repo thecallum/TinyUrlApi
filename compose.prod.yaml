@@ -31,7 +31,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports: []
     volumes:
-      - postgres-data-prod:/var/lib/postgresql/data
+      - postgres-data-prod:/var/lib/postgresql
     networks:
       - internal
 
